@@ -107,15 +107,16 @@ jobs:
           retry_wait_seconds: 30
           command: npm ci --verbose --ignore-scripts
 
-      - name: Build native modules for Linux
-        run: |
-          echo "Building native modules for Linux x64"
-          cd ./packages/main/src/native-addon
-          node-gyp clean
-          CFLAGS="-fexceptions" CXXFLAGS="-fexceptions" node-gyp configure --arch=x64
-          CFLAGS="-fexceptions" CXXFLAGS="-fexceptions" node-gyp build --arch=x64
-          cd ../../..
-          ls -la ./packages/main/src/native-addon/build/Release/
+      # 注释掉 Build native modules for Linux 步骤
+      # - name: Build native modules for Linux
+      #   run: |
+      #     echo "Building native modules for Linux x64"
+      #     cd ./packages/main/src/native-addon
+      #     node-gyp clean
+      #     CFLAGS="-fexceptions" CXXFLAGS="-fexceptions" node-gyp configure --arch=x64
+      #     CFLAGS="-fexceptions" CXXFLAGS="-fexceptions" node-gyp build --arch=x64
+      #     cd ../../..
+      #     ls -la ./packages/main/src/native-addon/build/Release/
 
       - name: Create .env.production.local
         run: |
