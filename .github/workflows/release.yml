@@ -162,8 +162,8 @@ jobs:
           echo "Building native modules for Linux x64"
           cd ./packages/main/src/native-addon
           node-gyp clean
-          node-gyp configure --arch=x64
-          node-gyp build --arch=x64
+          node-gyp configure --arch=x64 -- -fexceptions
+          node-gyp build --arch=x64 -- -fexceptions
           cd ../../..
           ls -la ./packages/main/src/native-addon/build/Release/
 
