@@ -105,15 +105,15 @@ jobs:
           timeout_minutes: 20
           max_attempts: 3
           retry_wait_seconds: 30
-          command: npm ci --verbose --ignore-scripts  # 跳过 postinstall
+          command: npm ci --verbose --ignore-scripts
 
       - name: Build native modules for Linux
         run: |
           echo "Building native modules for Linux x64"
           cd ./packages/main/src/native-addon
           node-gyp clean
-          node-gyp configure --arch=x64 -- -fexceptions
-          node-gyp build --arch=x64 -- -fexceptions
+          CFLAGS="-fexceptions" CXXFLAGS="-fexceptions" node-gyp configure --arch=x64
+          CFLAGS="-fexceptions" CXXFLAGS="-fexceptions" node-gyp build --arch=x64
           cd ../../..
           ls -la ./packages/main/src/native-addon/build/Release/
 
