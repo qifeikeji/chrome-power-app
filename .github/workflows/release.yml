@@ -23,7 +23,7 @@ on:
         required: true
       VITE_START_PAGE_URL:
         required: true
-  workflow_dispatch:  # 添加手动触发支持
+  workflow_dispatch:
     inputs:
       dry-run:
         description: 'Compiles the app but not upload artifacts to distribution server'
@@ -74,7 +74,6 @@ jobs:
           git lfs install
           git lfs pull
 
-      # 配置环境变量
       - name: Configure environment
         env:
           PUPPETEER_SKIP_CHROMIUM_DOWNLOAD: 1
@@ -88,7 +87,6 @@ jobs:
             echo "ELECTRON_ARCH=x64" >> $GITHUB_ENV
           fi
 
-      # 缓存依赖
       - name: Cache npm dependencies
         uses: actions/cache@v3
         with:
@@ -100,7 +98,6 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-${{ matrix.arch }}-npm-
 
-      # macOS 特定设置
       - name: Setup macOS build tools
         if: startsWith(matrix.platform, 'mac')
         run: |
@@ -110,16 +107,14 @@ jobs:
           echo "PYTHON=/opt/homebrew/opt/python@3.11/bin/python3.11" >> $GITHUB_ENV
           /opt/homebrew/opt/python@3.11/bin/python3.11 -m pip install setuptools
 
-      # Linux 特定设置
       - name: Setup Linux build tools
         if: matrix.platform == 'linux'
         run: |
           sudo apt-get update
-          sudo apt-get install -y python3.11 python3-pip python3-dev build-essential libx11-dev libxkbfile-dev libsecret-1-dev
-          sudo ln -sf /usr/bin/python3.11 /usr/bin/python3
+          sudo apt-get install -y python3 python3-pip python3-dev build-essential libx11-dev libxkbfile-dev libsecret-1-dev
+          sudo ln -sf /usr/bin/python3 /usr/bin/python
           python3 -m pip install setuptools node-gyp
 
-      # 设置 Node.js
       - name: Use Node.js
         uses: actions/setup-node@v3
         with:
@@ -148,7 +143,6 @@ jobs:
           retry_wait_seconds: 30
           command: npm ci --verbose
 
-      # 构建原生模块 - macOS
       - name: Build native modules for macOS
         if: startsWith(matrix.platform, 'mac')
         run: |
@@ -161,7 +155,6 @@ jobs:
           fi
           ls -la ./packages/main/src/native-addon/build/Release/
 
-      # 构建原生模块 - Linux
       - name: Build native modules for Linux
         if: matrix.platform == 'linux'
         run: |
@@ -173,7 +166,6 @@ jobs:
           cd ../../..
           ls -la ./packages/main/src/native-addon/build/Release/
 
-      # 安装 Apple 证书（仅 macOS）
       - name: Install Apple certificates
         if: startsWith(matrix.platform, 'mac')
         env:
@@ -193,17 +185,14 @@ jobs:
           security import $CERTIFICATE_PATH/certificate.p12 -k build.keychain -P "$P12_PASSWORD" -T /usr/bin/codesign
           security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$KEYCHAIN_PASSWORD" build.keychain
 
-      # 创建环境配置
       - name: Create .env.production.local
         run: |
           echo "VITE_APP_API=${{ secrets.VITE_APP_API }}" > .env.production.local
           echo "VITE_START_PAGE_URL=${{ secrets.VITE_START_PAGE_URL }}" >> .env.production.local
 
-      # 构建项目
       - name: Build Project
         run: npm run build
 
-      # 构建和发布 - Windows
       - name: Build and Publish for Windows
         if: matrix.platform == 'win'
         uses: nick-fields/retry@v2
@@ -217,7 +206,6 @@ jobs:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
           BUILD_TIME: ${{ github.run_number }}
 
-      # 构建和发布 - macOS x64
       - name: Build and Publish for macOS x64
         if: matrix.platform == 'mac-x64'
         uses: nick-fields/retry@v2
@@ -232,7 +220,6 @@ jobs:
           BUILD_TIME: ${{ github.run_number }}
           APPLE_IDENTITY: ${{ secrets.APPLE_IDENTITY }}
 
-      # 构建和发布 - macOS arm64
       - name: Build and Publish for macOS arm64
         if: matrix.platform == 'mac-arm64'
         uses: nick-fields/retry@v2
@@ -247,7 +234,6 @@ jobs:
           BUILD_TIME: ${{ github.run_number }}
           APPLE_IDENTITY: ${{ secrets.APPLE_IDENTITY }}
 
-      # 构建和发布 - Linux AppImage
       - name: Build and Publish for Linux AppImage
         if: matrix.platform == 'linux'
         uses: nick-fields/retry@v2
