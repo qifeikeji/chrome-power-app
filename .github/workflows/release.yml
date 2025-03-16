@@ -113,7 +113,8 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y python3 python3-pip python3-dev build-essential libx11-dev libxkbfile-dev libsecret-1-dev
           sudo ln -sf /usr/bin/python3 /usr/bin/python
-          python3 -m pip install setuptools node-gyp
+          python3 -m pip install setuptools
+          npm install -g node-gyp
 
       - name: Use Node.js
         uses: actions/setup-node@v3
